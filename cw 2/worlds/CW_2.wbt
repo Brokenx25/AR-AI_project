@@ -1,0 +1,84 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+EXTERNPROTO "../protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/solids/protos/SolidBox.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puckGroundSensors.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/animals/protos/Horse.proto"
+
+WorldInfo {
+}
+Viewpoint {
+  orientation -0.43854252530415266 -0.4406419065417925 0.7832720879101149 4.475153352037822
+  position 0.0788009178533857 0.3077524580961006 1.732980586924032
+  follow "e-puck"
+  followType "None"
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+  luminosity 1.5
+}
+E-puck {
+  hidden position_0_0 39.3499429967866
+  hidden position_0_1 39.34994299867371
+  hidden rotation_1 0 0.9999999999999999 0 1.6508311537090832
+  hidden rotation_2 0 1 0 1.6508311555961923
+  translation 0.00999964 -0.453055 -3.78585e-05
+  rotation 8.51952083000526e-05 8.52541883041185e-05 -0.9999999927367498 1.5707908126587102
+  controller "main_controller"
+  camera_rotation 0 1 0 -0.1308996938995747
+  groundSensorsSlot [
+    E-puckGroundSensors {
+    }
+  ]
+}
+RectangleArena {
+  translation 0 -0.01 0
+  floorSize 2 2
+  floorTileSize 2 2
+  floorAppearance PBRAppearance {
+    baseColorMap ImageTexture {
+      url [
+        "../texture/WoodFloor051_4K-JPG_Color.jpg"
+      ]
+    }
+    metalness 0
+  }
+  wallHeight 0.3
+}
+SolidBox {
+  translation 0.53 -0.38 0.05
+  size 0.3 0.3 0.1
+  appearance PBRAppearance {
+    baseColor 1 0 0
+    roughness 0.5
+    metalness 0
+  }
+}
+SolidBox {
+  translation -0.5 -0.38 0.05
+  name "box(1)"
+  size 0.3 0.3 0.1
+  appearance PBRAppearance {
+    baseColor 0 1 0
+    roughness 0.5
+    metalness 0
+  }
+}
+SolidBox {
+  translation 0.52 0.51 0.05
+  name "box(2)"
+  size 0.3 0.3 0.1
+  appearance PBRAppearance {
+    baseColor 0 0 1
+    roughness 0.5
+    metalness 0
+  }
+}
+Horse {
+  translation 0 -0.9 0
+  scale 0.1
+}
