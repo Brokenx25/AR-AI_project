@@ -1,7 +1,18 @@
 from controller import Robot, Camera
-import cv2
 import numpy as np
 import os
+import cv2
+import time
+
+# === SUPPRESS TensorFlow Logs ===
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import tensorflow as tf
+import logging
+logging.getLogger('tensorflow').setLevel(logging.FATAL)
+
+# === LOAD MODELS ===
+model_adam = tf.keras.models.load_model('cnn_adam_model.h5')
+model_sgd = tf.keras.models.load_model('cnn_sgd_model.h5')
 
 # === Robot Initialization ===
 robot = Robot()
@@ -35,20 +46,6 @@ image_saved = False
 
 # === Main Loop ===
 while robot.step(TIME_STEP) != -1:
-    # === Save image once when camera is ready ===
-    if not image_saved:
-        image = camera.getImage()
-        width = camera.getWidth()
-        height = camera.getHeight()
-
-        # Convert BGRA to BGR
-        image_array = np.frombuffer(image, np.uint8).reshape((height, width, 4))
-        image_bgr = image_array[:, :, :3]
-        filename = "robot_view.png"
-        cv2.imwrite(filename, image_bgr)
-        print(f"[INFO] Image saved to: {os.path.abspath(filename)}")
-        image_saved = True
-
     # === Sensor Reading ===
     distances = [sensor.getValue() for sensor in distance_sensors]
 
@@ -77,14 +74,49 @@ while robot.step(TIME_STEP) != -1:
     r = r_total // count
     g = g_total // count
     b = b_total // count
+    #print(r,g,b)
+    # === Image Capture ONLY IF Center is White ===
+    if not image_saved and r > 100 and g > 100 and b > 100:
+        image_array = np.frombuffer(image, np.uint8).reshape((height, width, 4))
+        image_rgb = image_array[:, :, :3]
+        filename = "robot_view.png"
+        cv2.imwrite(filename, image_rgb)
+        print(f"[INFO] White detected! Image saved to: {os.path.abspath(filename)}")
+
+        # === Preprocess for CNN model ===
+        resized = cv2.resize(image_rgb, (32, 32))
+        normalized = resized.astype('float32') / 255.0
+        input_image = np.expand_dims(normalized, axis=0)
+
+        # === Prediction using Adam and SGD models ===
+        prediction_adam = model_adam.predict(input_image, verbose=0)
+        prediction_sgd = model_sgd.predict(input_image, verbose=0)
+
+        class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer',
+                       'dog', 'frog', 'horse', 'ship', 'truck']
+
+        label_adam = class_names[np.argmax(prediction_adam)]
+        label_sgd = class_names[np.argmax(prediction_sgd)]
+
+        print(f"[CNN Adam] Prediction: {label_adam}")
+        print(f"[CNN SGD ] Prediction: {label_sgd}")
+
+        # === STOP and wait 3 seconds ===
+        left_motor.setVelocity(0)
+        right_motor.setVelocity(0)
+        pause_steps = int(3000 / TIME_STEP)
+        for _ in range(pause_steps):
+            robot.step(TIME_STEP)
+
+        image_saved = True
 
     # === Color Detection ===
     detected_color = None
-    if r > 100 and g < 80 and b < 80:
+    if r > 200 and g < 40 and b < 45:
         detected_color = 'red'
-    elif g > 100 and r < 80 and b < 80:
+    elif g > 200 and r < 45 and b < 45:
         detected_color = 'green'
-    elif b > 100 and r < 80 and g < 80:
+    elif b > 200 and r < 45 and g < 45:
         detected_color = 'blue'
 
     if detected_color and detected_color not in seen_colors:
